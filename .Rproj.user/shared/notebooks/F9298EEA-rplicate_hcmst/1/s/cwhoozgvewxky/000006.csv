@@ -1,0 +1,2 @@
+"0","data <- data.frame(read_sav('data_input/HCMST_ver_3.04.sav'))"
+"0","head(data)"

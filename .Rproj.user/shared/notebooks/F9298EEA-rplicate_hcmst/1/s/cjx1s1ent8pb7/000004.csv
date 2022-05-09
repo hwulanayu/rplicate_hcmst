@@ -1,0 +1,4 @@
+"0","library(extrafont)"
+"0","loadfonts(device = ""win"")"
+"0",""
+"0","custom_font_family <- ""ITC Officina Sans"""

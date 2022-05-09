@@ -1,0 +1,5 @@
+"0","data <- read.spss('data_input/HCMST_ver_3.04.sav', to.data.frame = TRUE,"
+"0","                    use.value.labels = FALSE)"
+"2","re-encoding from UTF-8
+"
+"0","head(data)"
