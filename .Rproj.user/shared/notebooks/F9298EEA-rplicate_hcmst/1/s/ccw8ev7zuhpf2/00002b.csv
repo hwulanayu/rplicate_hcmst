@@ -1,8 +1,0 @@
-"0","ggplot(data_hcmst_select,
-       aes(x = year_couple_met,
-           y = frequency)) +
-  geom_line(aes(y = (..count..)/sum(..count..),
-                colour = where_couple_met))
-"
-"2","Error in sum(count) : invalid 'type' (closure) of argument
-"

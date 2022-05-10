@@ -35,6 +35,7 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(tidyr)
+library(ggthemes)
 ```
 
 ## Load Fonts
@@ -134,13 +135,11 @@ head(data_hcmst_select)
 ```
 
 ```{r}
-data_hcmst_select$year_couple_met <- as.Date(data_hcmst_select$year_couple_met, origin = "1934-02-01")
-
-head(data_hcmst_select)
+#data_hcmst_select$year_couple_met <- as.Date(data_hcmst_select$year_couple_met, origin = "1934-02-01")
+#head(data_hcmst_select)
 ```
 
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = frequency)) +
@@ -152,17 +151,55 @@ ggplot(data_hcmst_select,
 ```
 
 ```{r eval=FALSE, include=FALSE}
-data_hcmst_melt <- melt(data = data_hcmst,
-                        id.vars = 'year_couple_met',
-                        variable.name = 'where_couple_met')
+ggplot(data_hcmst_select,
+       aes(x = year_couple_met,
+           y = frequency)) +
+  geom_line(colour = where_couple_met)) +
+  scale_x_date(date_breaks = "10 years", 
+               date_labels = "%y")
+```
 
-data_hcmst_melt
+```{r}
+coba <- data_hcmst %>% 
+  select(-c("HCMST_main_interview_yrmo",
+         "how_long_ago_first_met")) %>% 
+  pivot_longer(cols = -c(year_couple_met, same_sex_couple),
+               names_to = "where_couple_met",
+               values_to = "value",
+               ) %>% 
+group_by(where_couple_met) %>% 
+  mutate(frequency = value/sum(value)) 
+
+head(coba)
+```
+
+```{r}
+ggplot(coba,
+       aes(x = year_couple_met,
+           y = frequency, group = where_couple_met)) +
+  geom_line(aes(colour = where_couple_met)) +
+  facet_wrap(~as.factor(same_sex_couple), ncol=2) +
+  scale_x_date(date_breaks = "10 years", 
+               date_labels = "%y") +
+  scale_y_continuous(labels = scales::percent)
+
+```
+
+
+```{r}
+unique(coba$frequency)
+```
+```{r}
+unique(data_hcmst_select)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggplot(data_hcmst_select,
+ggplot(coba,
        aes(x = year_couple_met,
-           y = value)) +
-  geom_line(aes(colour = where_couple_met))
+           y = pct)) +
+  geom_line(aes(colour = where_couple_met)) +
+  scale_x_date(date_breaks = "10 years", 
+               date_labels = "%y") +
+  scale_y_continuous(labels = scales::percent)
 ```
 

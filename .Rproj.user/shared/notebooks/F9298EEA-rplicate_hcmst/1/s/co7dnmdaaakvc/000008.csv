@@ -1,6 +1,0 @@
-"0","ggplot(data_hcmst_select,"
-"0","       aes(x = year_couple_met,"
-"0","           y = value)) +"
-"0","  geom_line(aes(colour = where_couple_met))"
-"2","Don't know how to automatically pick scale for object of type haven_labelled/vctrs_vctr/double. Defaulting to continuous.
-"
