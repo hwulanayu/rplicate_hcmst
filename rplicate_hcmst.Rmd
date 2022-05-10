@@ -50,15 +50,12 @@ custom_font_family <- "ITC Officina Sans"
 # Data Collection
 Dataset is taken from [data.stanford.edu](https://data.stanford.edu/hcmst#download-data) with SPSS format.
 ```{r}
-data <- data.frame(read_sav('data_input/HCMST_ver_3.04.sav'))
+data <- read_sav('data_input/HCMST_ver_3.04.sav')
 head(data)
 ```
-```{r message=FALSE, warning=FALSE}
-data <- read.spss('data_input/HCMST_ver_3.04.sav', to.data.frame = TRUE,
-                    use.value.labels = FALSE)
-head(data)
+```{r}
+str(data, list.len = 3)
 ```
-
 
 ```{r}
 dim(data)
@@ -69,6 +66,13 @@ The dataset consist of 4002 observations and 387 variables. There are 3009 of 40
 ```{r}
 unique(data$qflag)
 ```
+For further data wrangling, it's easier if we use the data in dataframe format and drop the SPSS labels. We do this by using `read.spss` function in [foreign](https://cran.r-project.org/web/packages/foreign/index.html) library.
+```{r message=FALSE, warning=FALSE}
+data <- read.spss('data_input/HCMST_ver_3.04.sav', to.data.frame = TRUE,
+                    use.value.labels = FALSE)
+head(data)
+```
+
 The graph was plotting the year couple met and where did they meet. The dataset doesn't have the variable that enlists what year the respondent and their couple met, but instead, they ask how long ago the respondent met their partner in years. We can get `year_couple_met` by subtracting `how_long_ago_first_met` variable with `HCMST_main_interview_yrmo` variable. See example below:
 ```{r}
 ym(data$HCMST_main_interview_yrmo)[1] - years(data$how_long_ago_first_met)[1]

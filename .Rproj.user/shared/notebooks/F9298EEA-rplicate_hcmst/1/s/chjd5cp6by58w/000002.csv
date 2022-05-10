@@ -1,6 +1,41 @@
 "0","library(haven)"
+"0","library(foreign)"
 "0","library(lubridate) "
+"2","
+Attaching package: ‘lubridate’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+"
 "0","library(dplyr)"
+"2","
+Attaching package: ‘dplyr’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
 "0","library(ggplot2)"
+"2","Learn more about the underlying theory at https://ggplot2-book.org/
+"
 "0","library(reshape2)"
 "0","library(tidyr)"
+"2","
+Attaching package: ‘tidyr’
+
+"
+"2","The following object is masked from ‘package:reshape2’:
+
+    smiths
+
+"
