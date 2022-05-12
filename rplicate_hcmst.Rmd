@@ -89,16 +89,14 @@ data_hcmst <- data %>%
          "q24_met_online",
          "q24_school" ,                     
          "q24_college",
-         "q24_military",
          "q24_church",
-         "q24_vol_org",
-         "q24_customer",
          "q24_bar_restaurant",
          "q24_R_cowork",
          "met_through_friends"
          )) %>% 
   mutate(HCMST_main_interview_yrmo = ym(HCMST_main_interview_yrmo)) %>% 
-  mutate(year_couple_met = HCMST_main_interview_yrmo - years(how_long_ago_first_met))
+  mutate(year_couple_met = HCMST_main_interview_yrmo - years(how_long_ago_first_met)) %>% 
+  mutate(year_couple_met = year(year_couple_met))
 
 head(data_hcmst)
 dim(data_hcmst)
@@ -119,7 +117,6 @@ Now we have 2924 observation left with clean dataset.
 colSums(is.na(data_hcmst))
 ```
 
-
 ```{r}
 data_hcmst_select <- data_hcmst %>% 
   select(-c("HCMST_main_interview_yrmo",
@@ -129,25 +126,35 @@ data_hcmst_select <- data_hcmst %>%
                values_to = "value",
                ) %>% 
   group_by(year_couple_met, where_couple_met) %>% 
-  summarise(frequency = sum(value))
+  summarise(frequency = sum(value)) %>% 
+  mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
 
 head(data_hcmst_select)
 ```
+```{r}
+class(data_hcmst_select$year_couple_met)
+```
 
 ```{r}
-#data_hcmst_select$year_couple_met <- as.Date(data_hcmst_select$year_couple_met, origin = "1934-02-01")
+write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardate.csv", row.names = FALSE)
+```
+
+```{r}
+#data_hcmst_select$year_couple_met <- as.Date(data_hcmst_select$year_couple_met, origin = "1934-01-01")
 #head(data_hcmst_select)
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = frequency)) +
-  geom_line(aes(y = (..count..)/sum(..count..),
-                colour = where_couple_met)) +
+  geom_line(aes(colour = where_couple_met)) +
   scale_x_date(date_breaks = "10 years", 
                date_labels = "%y") +
   scale_y_continuous(labels = scales::percent)
+```
+```{r}
+class(data_hcmst_select$year_couple_met)
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -167,17 +174,18 @@ coba <- data_hcmst %>%
                names_to = "where_couple_met",
                values_to = "value",
                ) %>% 
-group_by(where_couple_met) %>% 
-  mutate(frequency = value/sum(value)) 
+group_by(year_couple_met, where_couple_met) %>% 
+  summarise(frequency = sum(value)) %>% 
+  
 
 head(coba)
 ```
 
 ```{r}
-ggplot(coba,
-       aes(x = year_couple_met,
-           y = frequency, group = where_couple_met)) +
-  geom_line(aes(colour = where_couple_met)) +
+coba %>% 
+  group_by(where_couple_met) %>% 
+ggplot() +
+  geom_line(aes(x = year_couple_met, y = value, colour = where_couple_met)) +
   facet_wrap(~as.factor(same_sex_couple), ncol=2) +
   scale_x_date(date_breaks = "10 years", 
                date_labels = "%y") +
@@ -187,10 +195,10 @@ ggplot(coba,
 
 
 ```{r}
-unique(coba$frequency)
+unique(coba$percentage)
 ```
 ```{r}
-unique(data_hcmst_select)
+unique(data_hcmst_select$frequency)
 ```
 
 ```{r eval=FALSE, include=FALSE}
