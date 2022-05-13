@@ -125,8 +125,11 @@ data_hcmst_select <- data_hcmst %>%
                names_to = "where_couple_met",
                values_to = "value",
                ) %>% 
-  group_by(year_couple_met, where_couple_met) %>% 
+  group_by(same_sex_couple, year_couple_met, where_couple_met) %>% 
   summarise(frequency = sum(value)) %>% 
+  arrange(year_couple_met) %>% 
+  group_by(year_couple_met) %>% 
+  mutate(percentage = frequency/sum(frequency)*100) %>% 
   mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
 
 head(data_hcmst_select)
@@ -136,7 +139,7 @@ class(data_hcmst_select$year_couple_met)
 ```
 
 ```{r}
-write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardate.csv", row.names = FALSE)
+write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardatepercent.csv", row.names = FALSE)
 ```
 
 ```{r}
@@ -147,12 +150,30 @@ write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardate.csv", row.nam
 ```{r}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
-           y = frequency)) +
+           y = percentage)) +
   geom_line(aes(colour = where_couple_met)) +
   scale_x_date(date_breaks = "10 years", 
                date_labels = "%y") +
   scale_y_continuous(labels = scales::percent)
 ```
+
+```{r}
+ggplot(data_hcmst_select,
+       aes(x = year_couple_met,
+           y = frequency)) +
+ # geom_line(aes(colour = where_couple_met)) +
+  scale_x_date(date_breaks = "10 years", 
+               date_labels = "%y") +
+#  scale_y_continuous(labels = scales::percent)
+  facet_wrap(.~same_sex_couple) +
+  geom_smooth(aes(group = where_couple_met,
+                  colour = where_couple_met), 
+              method = "loess",
+              span = 0.8,
+              se = FALSE)
+```
+
+
 ```{r}
 class(data_hcmst_select$year_couple_met)
 ```
@@ -198,7 +219,7 @@ ggplot() +
 unique(coba$percentage)
 ```
 ```{r}
-unique(data_hcmst_select$frequency)
+unique(data_hcmst_select$percentage)
 ```
 
 ```{r eval=FALSE, include=FALSE}
