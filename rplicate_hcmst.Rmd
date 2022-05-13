@@ -157,20 +157,38 @@ ggplot(data_hcmst_select,
   scale_y_continuous(labels = scales::percent)
 ```
 
+We create `custom_color_palette` to customize the color of `geom_smooth()` for each category. We can extract color pallete from [image picker](https://coolors.co/image-picker) or find the The Economist style guide.
+```{r}
+custom_color_pallete <- list(online = "#01526D",
+                             college = "6DBBBF",
+                             church = "#692916",
+                             coworker = "#6ED0F6",
+                             school = "#AC8B96",
+                             bar_restaurant = "#F15B40",
+                             friend = "#01A4DC"
+                             )
+```
+
 ```{r}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = frequency)) +
- # geom_line(aes(colour = where_couple_met)) +
-  scale_x_date(date_breaks = "10 years", 
-               date_labels = "%y") +
-#  scale_y_continuous(labels = scales::percent)
-  facet_wrap(.~same_sex_couple) +
+ # geom_line(aes(colour = where_couple_met)) + 
   geom_smooth(aes(group = where_couple_met,
-                  colour = where_couple_met), 
-              method = "loess",
-              span = 0.8,
-              se = FALSE)
+              colour = where_couple_met), 
+          method = "loess",
+          span = 0.8,
+          se = FALSE,
+          size = 1.75) +
+  scale_x_date(date_breaks = "10 years", 
+             date_labels = "%y") +
+#  scale_y_continuous(labels = scales::percent)
+  facet_wrap(.~same_sex_couple, scales = "free") +
+  theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
+gray_bg = F, horizontal = TRUE) +
+  labs(title="Meet Markets", 
+       subtitle = "United States, how couples meet, %",
+       caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas')
 ```
 
 
