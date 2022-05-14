@@ -36,6 +36,7 @@ library(ggplot2)
 library(reshape2)
 library(tidyr)
 library(ggthemes)
+library(ggrepel)
 ```
 
 ## Load Fonts
@@ -203,6 +204,41 @@ left_plot
 ```
 
 
+```{r}
+left_plot +
+  geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_college" & data_hcmst_hetero$year_couple_met == "1940-01-01",],
+            label = "College",
+            nudge_y = 3,
+            size = 10,
+            hjust = "left") +
+  geom_text_repel(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_school" & data_hcmst_hetero$year_couple_met == "1946-01-01",],
+            label = "Primary/\nsecondary\nschool",
+            nudge_y = 0.1,
+            size = 10,
+            hjust = "left",
+            direction = "y",
+            segment.size = 1) +
+    geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_church" & data_hcmst_hetero$year_couple_met == "1959-01-01",],
+            label = "Church",
+            nudge_y = 1.9,
+            size = 10,
+            hjust = "left") +
+  geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_bar_restaurant" & data_hcmst_hetero$year_couple_met == "1967-01-01",],
+            label = "Bar/restaurant",
+            nudge_y = -2,
+            size = 10,
+            hjust = "left") +
+    geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "met_through_friends" & data_hcmst_hetero$year_couple_met == "1981-01-01",],
+            label = "Through Friends",
+            nudge_y = -1,
+            size = 10,
+            hjust = "left") +
+      geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_met_online" & data_hcmst_hetero$year_couple_met == "1987-01-01",],
+            label = expression(bold("Online")),
+            nudge_y = 2,
+            size = 10,
+            hjust = "left") 
+```
 
 
 
