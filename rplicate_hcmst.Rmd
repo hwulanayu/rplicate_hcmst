@@ -157,7 +157,15 @@ custom_color_pallete <- list(met_through_friends = "#01A4DC",
 ```
 
 ```{r}
-yearLabel <- c("1940", "50", "60", "70", "80", "90", "2000", "10")
+custom_date <- as.Date(paste0(seq(1940, 2010, 10), "-01-01"))
+
+x.labs <- ifelse((substr(as.character(dts), 1, 4) == "1940") | (substr(as.character(dts), 1, 4) == "2000"),
+                 substr(as.character(dts), 1, 4),
+                 substr(as.character(dts), 3, 4))
+
+x.labss <- '"1940" "50"   "60"   "70"   "80"   "90"   "2000" "10"  '
+
+x.labs
 ```
 
 
@@ -168,17 +176,18 @@ ggplot(data_hcmst_hetero,
   geom_smooth(aes(group = where_couple_met,
               colour = where_couple_met), 
           method = "loess",
-          span = 0.8,
+          span = 0.7,
           se = FALSE,
-          size = 4.5) +
-  scale_x_date(limits = as.Date(c("1934-01-01","2010-01-01")),
-               date_breaks = "10 years", 
-               date_labels = "%y", 
+          size = 3.7) +
+  scale_x_date(breaks = custom_date,
+               labels = x.labs,
+               limits = as.Date(c("1940-01-01","2010-01-01")), 
+               expand = c(0.01, 0)
                ) +
- # scale_x_continuous(labels= yearLabel) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
-  theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
-gray_bg = F, horizontal = TRUE) +
+  theme_economist_white(base_family = "ITC Officina Sans",
+                        gray_bg = F, 
+                        horizontal = TRUE) +
   labs(x = expression(italic("Year Couple Met")), y=NULL) +
   scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
 ```
@@ -211,7 +220,7 @@ data_hcmst_select <- data_hcmst %>%
   group_by(same_sex_couple, year_couple_met, where_couple_met) %>% 
   summarise(frequency = sum(value)) %>% 
   arrange(year_couple_met) %>% 
-  group_by(year_couple_met) %>% 
+  group_by(same_sex_couple) %>% 
   mutate(percentage = frequency/sum(frequency)*100) %>% 
   mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
 
