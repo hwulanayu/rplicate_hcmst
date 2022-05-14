@@ -141,10 +141,6 @@ data_hcmst_hetero <- data_hcmst %>%
 head(data_hcmst_hetero)
 ```
 
-```{r}
-write.csv(data_hcmst_select,"data_input/data_hcmst_select_heteropercent.csv", row.names = FALSE)
-```
-
 We create `custom_color_palette` to customize the color of `geom_smooth()` for each category. We can extract color pallete from [image picker](https://coolors.co/image-picker) or find the The Economist style guide.
 ```{r}
 custom_color_pallete <- list(met_through_friends = "#01A4DC",
@@ -158,16 +154,16 @@ custom_color_pallete <- list(met_through_friends = "#01A4DC",
 ```
 
 ```{r}
-custom_date <- as.Date(paste0(seq(1940, 2010, 10), "-01-01"))
+custom_date_left <- as.Date(paste0(seq(1940, 2010, 10), "-01-01"))
 
-x.labs <- ifelse((substr(as.character(dts), 1, 4) == "1940") | (substr(as.character(dts), 1, 4) == "2000"),
-                 substr(as.character(dts), 1, 4),
-                 substr(as.character(dts), 3, 4))
+x.labs <- ifelse((substr(as.character(custom_date_left), 1, 4) == "1940") | (substr(as.character(custom_date_left), 1, 4) == "2000"),
+                 substr(as.character(custom_date_left), 1, 4),
+                 substr(as.character(custom_date_left), 3, 4))
 
 x.labs
 ```
 
-
+## Base plot
 ```{r}
 left_plot <- ggplot(data_hcmst_hetero,
        aes(x = year_couple_met,
@@ -178,7 +174,7 @@ left_plot <- ggplot(data_hcmst_hetero,
           span = 0.8,
           se = FALSE,
           size = 3.7) +
-  scale_x_date(breaks = custom_date,
+  scale_x_date(breaks = custom_date_left,
                labels = x.labs,
                limits = as.Date(c("1940-01-01","2010-01-01")), 
                expand = c(0.01, 0)
@@ -203,7 +199,7 @@ left_plot <- ggplot(data_hcmst_hetero,
 left_plot
 ```
 
-
+## Labels 
 ```{r}
 left_plot +
   geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_college" & data_hcmst_hetero$year_couple_met == "1940-01-01",],
@@ -240,11 +236,79 @@ left_plot +
             hjust = "left") 
 ```
 
+# Right Plot
 
 
+```{r}
+data_hcmst_same_sex <- data_hcmst %>% 
+  filter(same_sex_couple == 1) %>% 
+  select(-c("HCMST_main_interview_yrmo",
+         "how_long_ago_first_met",
+         "same_sex_couple")) %>% 
+  pivot_longer(cols = -year_couple_met,
+               names_to = "where_couple_met",
+               values_to = "value") %>% 
+  group_by(year_couple_met, where_couple_met) %>% 
+  summarise(frequency = sum(value)) %>% 
+  mutate(percentage = frequency/sum(frequency)*100) %>% 
+  mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
 
+head(data_hcmst_same_sex)
+```
 
+## Base plot
 
+```{r}
+custom_date_right <- as.Date(c("1980-01-01", 
+                             "1985-01-01", 
+                             "1990-01-01",
+                             "2000-01-01",
+                             "2010-01-01"))
+
+x.labs <- ifelse(substr(as.character(custom_date_right), 1, 4) == "2000",
+                 substr(as.character(custom_date_right), 1, 4),
+                 substr(as.character(custom_date_right), 3, 4))
+
+x.labs[2] <- ""
+x.labs
+```
+
+```{r}
+right_plot <- ggplot(data_hcmst_same_sex,
+       aes(x = year_couple_met,
+           y = percentage)) +
+  geom_smooth(aes(group = where_couple_met,
+              colour = where_couple_met), 
+          method = "loess",
+          span = 0.8,
+          se = FALSE,
+          size = 3.7) +
+  scale_x_date(breaks = custom_date_right,
+               labels = x.labs,
+               limits = as.Date(c("1980-01-01","2010-01-01")),
+               expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 70), 
+                     breaks = seq(0, 70, by = 10),
+                     position = "right") +
+  theme_economist_white(base_family = "ITC Officina Sans",
+                        gray_bg = F, 
+                        horizontal = TRUE) +
+  theme(text = element_text(family = custom_font_family, 
+                            size = 25, color = "black"),
+        axis.ticks.length = unit(5, "pt"),
+        axis.ticks.x = element_line(size = 0.75),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        panel.grid.major.y = element_line(color = "#B2C2CA", 
+                                          size = 1.5),
+        legend.position = "none",
+        aspect.ratio = 1) +
+  labs(x = NULL, y=NULL) +
+  scale_color_manual(values = unlist(custom_color_pallete, 
+                                     use.names = FALSE))
+
+right_plot
+```
 
 
 
