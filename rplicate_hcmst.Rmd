@@ -163,20 +163,18 @@ x.labs <- ifelse((substr(as.character(dts), 1, 4) == "1940") | (substr(as.charac
                  substr(as.character(dts), 1, 4),
                  substr(as.character(dts), 3, 4))
 
-x.labss <- '"1940" "50"   "60"   "70"   "80"   "90"   "2000" "10"  '
-
 x.labs
 ```
 
 
 ```{r}
-ggplot(data_hcmst_hetero,
+left_plot <- ggplot(data_hcmst_hetero,
        aes(x = year_couple_met,
            y = percentage)) +
   geom_smooth(aes(group = where_couple_met,
               colour = where_couple_met), 
           method = "loess",
-          span = 0.7,
+          span = 0.8,
           se = FALSE,
           size = 3.7) +
   scale_x_date(breaks = custom_date,
@@ -188,8 +186,20 @@ ggplot(data_hcmst_hetero,
   theme_economist_white(base_family = "ITC Officina Sans",
                         gray_bg = F, 
                         horizontal = TRUE) +
+  theme(text = element_text(family = custom_font_family, 
+                            size = 25, color = "black"),
+        axis.ticks.length = unit(5, "pt"),
+        axis.ticks.x = element_line(size = 0.75),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        panel.grid.major.y = element_line(color = "#B2C2CA", 
+                                          size = 1.5),
+        legend.position = "none",
+        aspect.ratio = 0.8) +
   labs(x = expression(italic("Year Couple Met")), y=NULL) +
-  scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
+  scale_color_manual(values = unlist(custom_color_pallete, 
+                                     use.names = FALSE))
+
+left_plot
 ```
 
 
@@ -219,6 +229,7 @@ data_hcmst_select <- data_hcmst %>%
                ) %>% 
   group_by(same_sex_couple, year_couple_met, where_couple_met) %>% 
   summarise(frequency = sum(value)) %>% 
+  ungroup
   arrange(year_couple_met) %>% 
   group_by(same_sex_couple) %>% 
   mutate(percentage = frequency/sum(frequency)*100) %>% 
