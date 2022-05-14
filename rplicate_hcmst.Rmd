@@ -74,6 +74,7 @@ data <- read.spss('data_input/HCMST_ver_3.04.sav', to.data.frame = TRUE,
 head(data)
 ```
 
+# Data Wrangling
 The graph was plotting the year couple met and where did they meet. The dataset doesn't have the variable that enlists what year the respondent and their couple met, but instead, they ask how long ago the respondent met their partner in years. We can get `year_couple_met` by subtracting `how_long_ago_first_met` variable with `HCMST_main_interview_yrmo` variable. See example below:
 ```{r}
 ym(data$HCMST_main_interview_yrmo)[1] - years(data$how_long_ago_first_met)[1]
@@ -111,11 +112,93 @@ data_hcmst <- data_hcmst %>%
   drop_na()
 
 dim(data_hcmst)
+table(data_hcmst$same_sex_couple)
 ```
-Now we have 2924 observation left with clean dataset.
+
+Now we have 2924 observation, 2462 observations for heterosexual couples and 462 
+observations for same-sex couples. with clean dataset.
+
 ```{r}
 colSums(is.na(data_hcmst))
 ```
+
+# Left plot
+```{r}
+data_hcmst_hetero <- data_hcmst %>% 
+  filter(same_sex_couple == 0) %>% 
+  select(-c("HCMST_main_interview_yrmo",
+         "how_long_ago_first_met",
+         "same_sex_couple")) %>% 
+  pivot_longer(cols = -year_couple_met,
+               names_to = "where_couple_met",
+               values_to = "value") %>% 
+  group_by(year_couple_met, where_couple_met) %>% 
+  summarise(frequency = sum(value)) %>% 
+  mutate(percentage = frequency/sum(frequency)*100) %>% 
+  mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
+
+head(data_hcmst_hetero)
+```
+
+```{r}
+write.csv(data_hcmst_select,"data_input/data_hcmst_select_heteropercent.csv", row.names = FALSE)
+```
+
+We create `custom_color_palette` to customize the color of `geom_smooth()` for each category. We can extract color pallete from [image picker](https://coolors.co/image-picker) or find the The Economist style guide.
+```{r}
+custom_color_pallete <- list(met_through_friends = "#01A4DC",
+                             q24_bar_restaurant = "#F15B40",
+                             q24_church = "#692916",
+                             q24_college = "#91b8bd",
+                             q24_met_online = "#336666",
+                             q24_R_cowork = "#6ED0F6",
+                             q24_school = "#AC8B96"
+                             )
+```
+
+```{r}
+yearLabel <- c("1940", "50", "60", "70", "80", "90", "2000", "10")
+```
+
+
+```{r}
+ggplot(data_hcmst_hetero,
+       aes(x = year_couple_met,
+           y = percentage)) +
+  geom_smooth(aes(group = where_couple_met,
+              colour = where_couple_met), 
+          method = "loess",
+          span = 0.8,
+          se = FALSE,
+          size = 4.5) +
+  scale_x_date(limits = as.Date(c("1934-01-01","2010-01-01")),
+               date_breaks = "10 years", 
+               date_labels = "%y", 
+               ) +
+ # scale_x_continuous(labels= yearLabel) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
+  theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
+gray_bg = F, horizontal = TRUE) +
+  labs(x = expression(italic("Year Couple Met")), y=NULL) +
+  scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 data_hcmst_select <- data_hcmst %>% 
@@ -150,28 +233,6 @@ write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardatepercent.csv", 
 ```{r}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
-           y = percentage)) +
-  geom_line(aes(colour = where_couple_met)) +
-  scale_x_date(date_breaks = "10 years", 
-               date_labels = "%y") +
-  scale_y_continuous(labels = scales::percent)
-```
-
-We create `custom_color_palette` to customize the color of `geom_smooth()` for each category. We can extract color pallete from [image picker](https://coolors.co/image-picker) or find the The Economist style guide.
-```{r}
-custom_color_pallete <- list(met_through_friends = "#01A4DC",
-                             q24_bar_restaurant = "#F15B40",
-                             q24_church = "#692916",
-                             q24_college = "#91b8bd",
-                             q24_met_online = "#336666",
-                             q24_R_cowork = "#6ED0F6",
-                             q24_school = "#AC8B96"
-                             )
-```
-
-```{r}
-ggplot(data_hcmst_select,
-       aes(x = year_couple_met,
            y = frequency)) +
  # geom_line(aes(colour = where_couple_met)) + 
   geom_smooth(aes(group = where_couple_met,
@@ -180,10 +241,10 @@ ggplot(data_hcmst_select,
           span = 0.8,
           se = FALSE,
           size = 5) +
+  facet_wrap(.~same_sex_couple, scales = "free_y") +
   scale_x_date(date_breaks = "10 years", 
-             date_labels = "%y") +
+               date_labels = "%y") +
 #  scale_y_continuous(labels = scales::percent)
-  facet_wrap(.~same_sex_couple, scales = "free") +
   theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
 gray_bg = F, horizontal = TRUE) +
   labs(title="Meet Markets", 
@@ -206,7 +267,7 @@ ggplot(data_hcmst_select,
                date_labels = "%y")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 coba <- data_hcmst %>% 
   select(-c("HCMST_main_interview_yrmo",
          "how_long_ago_first_met")) %>% 
@@ -221,7 +282,7 @@ group_by(year_couple_met, where_couple_met) %>%
 head(coba)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 coba %>% 
   group_by(where_couple_met) %>% 
 ggplot() +
@@ -234,7 +295,7 @@ ggplot() +
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 unique(coba$percentage)
 ```
 ```{r}
