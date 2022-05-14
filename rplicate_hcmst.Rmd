@@ -159,13 +159,13 @@ ggplot(data_hcmst_select,
 
 We create `custom_color_palette` to customize the color of `geom_smooth()` for each category. We can extract color pallete from [image picker](https://coolors.co/image-picker) or find the The Economist style guide.
 ```{r}
-custom_color_pallete <- list(online = "#01526D",
-                             college = "6DBBBF",
-                             church = "#692916",
-                             coworker = "#6ED0F6",
-                             school = "#AC8B96",
-                             bar_restaurant = "#F15B40",
-                             friend = "#01A4DC"
+custom_color_pallete <- list(met_through_friends = "#01A4DC",
+                             q24_bar_restaurant = "#F15B40",
+                             q24_church = "#692916",
+                             q24_college = "#91b8bd",
+                             q24_met_online = "#336666",
+                             q24_R_cowork = "#6ED0F6",
+                             q24_school = "#AC8B96"
                              )
 ```
 
@@ -179,7 +179,7 @@ ggplot(data_hcmst_select,
           method = "loess",
           span = 0.8,
           se = FALSE,
-          size = 1.75) +
+          size = 5) +
   scale_x_date(date_breaks = "10 years", 
              date_labels = "%y") +
 #  scale_y_continuous(labels = scales::percent)
@@ -188,7 +188,8 @@ ggplot(data_hcmst_select,
 gray_bg = F, horizontal = TRUE) +
   labs(title="Meet Markets", 
        subtitle = "United States, how couples meet, %",
-       caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas')
+       caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas') +
+   scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
 ```
 
 
