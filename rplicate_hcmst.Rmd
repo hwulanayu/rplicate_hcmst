@@ -2,7 +2,11 @@
 title: "Rplicate Series: How (American) Couples Meet and Stay Together"
 author: "hwulanayu"
 date: "`r format(Sys.Date(), '%B %e, %Y')`"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
 ---
 
 ```{r setup, include=FALSE}
@@ -12,9 +16,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
   fig.align = "center",
-  comment = "#>",
-  fig.width=10,
-  fig.height=6
+  comment = "#>"
 )
 ```
 
@@ -28,6 +30,7 @@ knitr::include_graphics("assets/meet_markets_graph_the_economist.png")
 ## Load Packages
 Below is the required packages for data wrangling and visualization.
 ```{r library, message=FALSE, warning=FALSE}
+library(extrafont)
 library(haven)
 library(foreign)
 library(lubridate) 
@@ -37,14 +40,14 @@ library(reshape2)
 library(tidyr)
 library(ggthemes)
 library(ggrepel)
+library(png)
+library(grid)
+library(gridExtra)
 ```
 
 ## Load Fonts
 We use Officina Sans based on [ggthemes package documentary](https://mran.microsoft.com/snapshot/2015-01-14/web/packages/ggthemes/ggthemes.pdf) regarding the economist theme.
 ```{r font, message=FALSE, warning=FALSE}
-library(extrafont)
-loadfonts(device = "win")
-
 custom_font_family <- "ITC Officina Sans"
 ```
 
@@ -72,7 +75,7 @@ For further data wrangling, it's easier if we use the data in dataframe format a
 ```{r message=FALSE, warning=FALSE}
 data <- read.spss('data_input/HCMST_ver_3.04.sav', to.data.frame = TRUE,
                     use.value.labels = FALSE)
-head(data)
+head(data)[1:5,1:7]
 ```
 
 # Data Wrangling
@@ -124,6 +127,8 @@ colSums(is.na(data_hcmst))
 ```
 
 # Left plot
+
+Relative percentage: for each year, what percentage of partners of each sexual preference first met on each occasion/place?
 ```{r}
 data_hcmst_hetero <- data_hcmst %>% 
   filter(same_sex_couple == 0) %>% 
@@ -191,7 +196,7 @@ left_plot <- ggplot(data_hcmst_hetero,
         panel.grid.major.y = element_line(color = "#B2C2CA", 
                                           size = 1.5),
         legend.position = "none",
-        aspect.ratio = 0.8) +
+        aspect.ratio = 1) +
   labs(x = expression(italic("Year Couple Met")), y=NULL) +
   scale_color_manual(values = unlist(custom_color_pallete, 
                                      use.names = FALSE))
@@ -201,7 +206,7 @@ left_plot
 
 ## Labels 
 ```{r}
-left_plot +
+left_plot_final <- left_plot +
   geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_college" & data_hcmst_hetero$year_couple_met == "1940-01-01",],
             label = "College",
             nudge_y = 3,
@@ -233,7 +238,9 @@ left_plot +
             label = expression(bold("Online")),
             nudge_y = 2,
             size = 10,
-            hjust = "left") 
+            hjust = "left")
+
+left_plot_final
 ```
 
 # Right Plot
@@ -302,7 +309,7 @@ right_plot <- ggplot(data_hcmst_same_sex,
         panel.grid.major.y = element_line(color = "#B2C2CA", 
                                           size = 1.5),
         legend.position = "none",
-        aspect.ratio = 1) +
+        aspect.ratio = 16/9) +
   labs(x = NULL, y=NULL) +
   scale_color_manual(values = unlist(custom_color_pallete, 
                                      use.names = FALSE))
@@ -312,7 +319,7 @@ right_plot
 
 ## Labels
 ```{r}
-right_plot +
+right_plot_final <- right_plot +
   geom_text(data = data_hcmst_hetero[data_hcmst_hetero$where_couple_met == "q24_church" & data_hcmst_hetero$year_couple_met == "1985-01-01",],
             label = "Church",
             nudge_y = -1,
@@ -335,9 +342,30 @@ right_plot +
             size = 10,
             hjust = "left")
 
+right_plot_final 
 ```
 
+```{r}
+png("assets/right_plot_final.png")
+print(right_plot_final)
+dev.off()
+```
 
+# Assemble
+
+```{r}
+grid.arrange(left_plot_final, right_plot_final, ncol = 2)
+
+# Economist red line
+grid.rect(x = 1, y = 0.997,
+          hjust = 1, vjust = 0,
+          gp = gpar(fill='#E5001C',lwd=0))
+grid.rect(x = 0.017, y = 0.91,
+          hjust = 1, vjust = 0,
+          gp = gpar(fill='#E5001C',lwd=0))
+
+
+```
 
 
 
@@ -355,26 +383,12 @@ data_hcmst_select <- data_hcmst %>%
                ) %>% 
   group_by(same_sex_couple, year_couple_met, where_couple_met) %>% 
   summarise(frequency = sum(value)) %>% 
-  arrange(year_couple_met) %>% 
-  group_by(same_sex_couple) %>% 
   mutate(percentage = frequency/sum(frequency)*100) %>% 
   mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
 
 head(data_hcmst_select)
 ```
-```{r}
-class(data_hcmst_select$year_couple_met)
-```
-
-```{r}
-write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardatepercent.csv", row.names = FALSE)
-```
-
-```{r}
-#data_hcmst_select$year_couple_met <- as.Date(data_hcmst_select$year_couple_met, origin = "1934-01-01")
-#head(data_hcmst_select)
-```
-
+## Plotting
 ```{r}
 facet_label <- c( `0` = "Heterosexual couples",
                   `1` = "Same-sex couples")
@@ -384,14 +398,14 @@ facet_label <- c( `0` = "Heterosexual couples",
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = percentage)) +
- # geom_line(aes(colour = where_couple_met)) + 
   geom_smooth(aes(group = where_couple_met,
               colour = where_couple_met), 
           method = "loess",
-          span = 0.5,
+          span = 0.8,
           se = FALSE,
           size = 5) +
-  facet_wrap(.~same_sex_couple,
+  facet_grid(.~same_sex_couple,
+             space = "free",
              scales = "free",
              labeller = as_labeller(facet_label)) +
   scale_x_date(breaks = custom_date_left,
@@ -399,19 +413,32 @@ ggplot(data_hcmst_select,
                limits = as.Date(c("1940-01-01","2010-01-01")), 
                expand = c(0.01, 0)
                ) +
-#  scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
-  theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
-gray_bg = F, horizontal = TRUE) +
+  scale_y_continuous(expand = c(0, 0), 
+                     limits = c(0, 70), 
+                     breaks = seq(0, 50, by = 10),
+                     sec.axis = sec_axis(trans = ~., 
+                                         breaks = seq(0, 
+                                                      70, 
+                                                      by = 10))) +
+  theme_economist_white(base_size = 11, 
+                        base_family = "ITC Officina Sans",
+                        gray_bg = F, 
+                        horizontal = TRUE) +
   theme(text = element_text(family = custom_font_family, 
-                            size = 25, color = "black"),
+                            size = 25, 
+                            color = "black"),
         axis.ticks.length = unit(5, "pt"),
         axis.ticks.x = element_line(size = 0.75),
-        axis.title.x = element_text(margin = margin(t = 15)),
+        axis.title.x = element_text(margin = margin(t = 10,
+                                                    r = 100)),
         panel.grid.major.y = element_line(color = "#B2C2CA", 
                                           size = 1.5),
-        strip.text = element_text(hjust = 0, face = "bold"),
-        legend.position = "none",
-        aspect.ratio = 0.8) +
+        strip.text = element_text(hjust = 0, 
+                                  face = "bold"),
+        plot.caption = element_text(hjust = 0,
+                                    margin = margin(t =20)),
+#        plot.title = element_text(margin = margin(t = -3)),
+        legend.position = "none") +
   labs(title="Meet Markets", 
        subtitle = "United States, how couples meet, %",
        caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas',
@@ -421,78 +448,7 @@ gray_bg = F, horizontal = TRUE) +
 ```
 
 
-```{r}
-scale_x_date(breaks = custom_date_left,
-               labels = x.labs,
-               limits = as.Date(c("1940-01-01","2010-01-01")), 
-               expand = c(0.01, 0)
-               ) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
-  theme_economist_white(base_family = "ITC Officina Sans",
-                        gray_bg = F, 
-                        horizontal = TRUE) +
-  theme(text = element_text(family = custom_font_family, 
-                            size = 25, color = "black"),
-        axis.ticks.length = unit(5, "pt"),
-        axis.ticks.x = element_line(size = 0.75),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        panel.grid.major.y = element_line(color = "#B2C2CA", 
-                                          size = 1.5),
-        legend.position = "none",
-        aspect.ratio = 0.8)
-```
-
-```{r eval=FALSE, include=FALSE}
-ggplot(data_hcmst_select,
-       aes(x = year_couple_met,
-           y = frequency)) +
-  geom_line(colour = where_couple_met)) +
-  scale_x_date(date_breaks = "10 years", 
-               date_labels = "%y")
-```
-
-```{r eval=FALSE, include=FALSE}
-coba <- data_hcmst %>% 
-  select(-c("HCMST_main_interview_yrmo",
-         "how_long_ago_first_met")) %>% 
-  pivot_longer(cols = -c(year_couple_met, same_sex_couple),
-               names_to = "where_couple_met",
-               values_to = "value",
-               ) %>% 
-group_by(year_couple_met, where_couple_met) %>% 
-  summarise(frequency = sum(value)) %>% 
-  
-
-head(coba)
-```
-
-```{r eval=FALSE, include=FALSE}
-coba %>% 
-  group_by(where_couple_met) %>% 
-ggplot() +
-  geom_line(aes(x = year_couple_met, y = value, colour = where_couple_met)) +
-  facet_wrap(~as.factor(same_sex_couple), ncol=2) +
-  scale_x_date(date_breaks = "10 years", 
-               date_labels = "%y") +
-  scale_y_continuous(labels = scales::percent)
-
-```
 
 
-```{r eval=FALSE, include=FALSE}
-unique(coba$percentage)
-```
-```{r}
-unique(data_hcmst_select$percentage)
-```
 
-```{r eval=FALSE, include=FALSE}
-ggplot(coba,
-       aes(x = year_couple_met,
-           y = pct)) +
-  geom_line(aes(colour = where_couple_met)) +
-  scale_x_date(date_breaks = "10 years", 
-               date_labels = "%y") +
-  scale_y_continuous(labels = scales::percent)
-```
 
