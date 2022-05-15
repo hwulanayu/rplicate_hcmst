@@ -342,9 +342,9 @@ right_plot +
 
 
 
+# Using facet
 
-
-
+## Data Wrangling
 ```{r}
 data_hcmst_select <- data_hcmst %>% 
   select(-c("HCMST_main_interview_yrmo",
@@ -376,6 +376,11 @@ write.csv(data_hcmst_select,"data_input/data_hcmst_select_yeardatepercent.csv", 
 ```
 
 ```{r}
+facet_label <- c( `0` = "Heterosexual couples",
+                  `1` = "Same-sex couples")
+```
+
+```{r}
 ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = percentage)) +
@@ -386,7 +391,9 @@ ggplot(data_hcmst_select,
           span = 0.5,
           se = FALSE,
           size = 5) +
-  facet_wrap(.~same_sex_couple, scales = "free_y") +
+  facet_wrap(.~same_sex_couple,
+             scales = "free",
+             labeller = as_labeller(facet_label)) +
   scale_x_date(breaks = custom_date_left,
                labels = x.labs,
                limits = as.Date(c("1940-01-01","2010-01-01")), 
@@ -395,9 +402,21 @@ ggplot(data_hcmst_select,
 #  scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
   theme_economist_white(base_size = 11, base_family = "ITC Officina Sans",
 gray_bg = F, horizontal = TRUE) +
+  theme(text = element_text(family = custom_font_family, 
+                            size = 25, color = "black"),
+        axis.ticks.length = unit(5, "pt"),
+        axis.ticks.x = element_line(size = 0.75),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        panel.grid.major.y = element_line(color = "#B2C2CA", 
+                                          size = 1.5),
+        strip.text = element_text(hjust = 0, face = "bold"),
+        legend.position = "none",
+        aspect.ratio = 0.8) +
   labs(title="Meet Markets", 
        subtitle = "United States, how couples meet, %",
-       caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas') +
+       caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas',
+       x = expression(italic("Year Couple Met")), 
+       y=NULL) +
    scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
 ```
 
