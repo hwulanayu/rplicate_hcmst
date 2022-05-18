@@ -46,7 +46,7 @@ library(gridExtra)
 ```
 
 ## Load Fonts
-We use Officina Sans based on [ggthemes package documentary](https://mran.microsoft.com/snapshot/2015-01-14/web/packages/ggthemes/ggthemes.pdf) regarding the economist theme.
+You can use Officina Sans based on [ggthemes package documentary](https://mran.microsoft.com/snapshot/2015-01-14/web/packages/ggthemes/ggthemes.pdf) regarding the economist theme for an exact result. Officina Sans is a commercial font and is available [here](http://www.myfonts.com/fonts/itc/officina-sans/).
 ```{r font, message=FALSE, warning=FALSE}
 custom_font_family <- "ITC Officina Sans"
 ```
@@ -391,6 +391,8 @@ head(data_hcmst_select)
 ```{r}
 facet_label <- c( `0` = "Heterosexual couples",
                   `1` = "Same-sex couples")
+
+unique(data_hcmst_select$same_sex_couple)
 ```
 
 ```{r}
@@ -418,11 +420,11 @@ full_plot <- ggplot(data_hcmst_select,
                                          breaks = seq(0, 
                                                       70, 
                                                       by = 10))) +
-  theme_economist_white(base_size = 11, 
-                        base_family = "ITC Officina Sans",
-                        gray_bg = F, 
-                        horizontal = TRUE) +
-  theme(text = element_text(family = custom_font_family,
+ # theme_economist_white(base_size = 11, 
+ #                       base_family = "ITC Officina Sans",
+  #                      gray_bg = F, 
+#                        horizontal = TRUE) +
+  theme(text = element_text(family = "custom_font_family",
                             color = "black"),
         axis.ticks.length = unit(5, "pt"),
         axis.ticks.x = element_line(size = 0.75),
@@ -432,6 +434,7 @@ full_plot <- ggplot(data_hcmst_select,
                                           size = 1),
         strip.text = element_text(hjust = 0, 
                                   face = "bold"),
+        strip.text.x = element_text(size = 10),
         plot.caption = element_text(hjust = 0,
                                     margin = margin(t =20)),
 #        plot.title = element_text(margin = margin(t = -3)),
@@ -441,7 +444,7 @@ full_plot <- ggplot(data_hcmst_select,
        caption='Source: "Searching for a Mate: The Rise of the Internet as a Social Intermediary", by Michael J. Rosenfield and Reuben J. Thomas',
        x = expression(italic("Year Couple Met")), 
        y=NULL) +
-   scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
+  scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE)) 
 
 full_plot
 ```
