@@ -454,47 +454,60 @@ full_plot_right_label <- full_plot +
   geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_college" & data_hcmst_select$year_couple_met == "1940-01-01",],
             label = "College",
             nudge_y = 5,
-            hjust ="left") +
+            hjust ="left", 
+            colour = "#383537") +
   geom_text_repel(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_school" & data_hcmst_select$year_couple_met == "1946-01-01",],
             label = "Primary/\nsecondary\nschool",
             nudge_y = 0.2,
             hjust = "left",
-            direction = "y") +
+            direction = "y", 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_church" & data_hcmst_select$year_couple_met == "1959-01-01",],
             label = "Church",
             nudge_y = 1.9,
-            hjust = "left") +
+            hjust = "left", 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_hetero$where_couple_met == "q24_bar_restaurant" & data_hcmst_select$year_couple_met == "1967-01-01",],
             label = "Bar/restaurant",
             nudge_y = -2,
-            hjust = "left") +
+            hjust = "left", 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "met_through_friends" & data_hcmst_select$year_couple_met == "1981-01-01",],
             label = "Through friends",
             nudge_y = -1,
-            hjust = "left") +
+            hjust = "left", 
+            colour = "#383537") +
         geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_met_online" & data_hcmst_select$year_couple_met == "1989-01-01" & data_hcmst_select$same_sex_couple == 0,],
             label = expression(bold("Online")),
-            nudge_y = 2)
+            nudge_y = 2, 
+            colour = "#383537")
 
 full_plot_right_label
 ```
 
 ```{r}
-full_plot_right_label +
+full_plot_full_label <- full_plot_right_label +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_church" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
             label = "Church",
-            nudge_y = -10) +
+            nudge_y = -10, 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_college" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
             label = "College",
-            nudge_y = 5) +
+            nudge_y = 5, 
+            colour = "#383537") +
   geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_R_cowork" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
             label = "Co-workers",
-            nudge_y = 3) +
+            nudge_y = 3, 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "met_through_friends" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
             label = "Through\nfriends",
-            nudge_y = 27) +
+            nudge_y = 27, 
+            colour = "#383537") +
     geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_met_online" & data_hcmst_select$year_couple_met == "2004-01-01" & data_hcmst_select$same_sex_couple == 1,],
             label = expression(bold("Online")),
-            nudge_y = 28)
+            nudge_y = 28, 
+            colour = "#383537")
+
+full_plot_full_label
 ```
 
