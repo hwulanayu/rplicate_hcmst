@@ -177,8 +177,7 @@ left_plot <- ggplot(data_hcmst_hetero,
               colour = where_couple_met), 
           method = "loess",
           span = 0.8,
-          se = FALSE,
-          size = 3.7) +
+          se = FALSE) +
   scale_x_date(breaks = custom_date_left,
                labels = x.labs,
                limits = as.Date(c("1940-01-01","2010-01-01")), 
@@ -188,8 +187,8 @@ left_plot <- ggplot(data_hcmst_hetero,
   theme_economist_white(base_family = "ITC Officina Sans",
                         gray_bg = F, 
                         horizontal = TRUE) +
-  theme(text = element_text(family = custom_font_family, 
-                            size = 25, color = "black"),
+  theme(text = element_text(family = custom_font_family,
+                            color = "black"),
         axis.ticks.length = unit(5, "pt"),
         axis.ticks.x = element_line(size = 0.75),
         axis.title.x = element_text(margin = margin(t = 15)),
@@ -288,8 +287,7 @@ right_plot <- ggplot(data_hcmst_same_sex,
               colour = where_couple_met), 
           method = "loess",
           span = 0.8,
-          se = FALSE,
-          size = 3.7) +
+          se = FALSE) +
   scale_x_date(breaks = custom_date_right,
                labels = x.labsr,
                limits = as.Date(c("1985-01-01","2010-01-01")),
@@ -301,8 +299,8 @@ right_plot <- ggplot(data_hcmst_same_sex,
   theme_economist_white(base_family = "ITC Officina Sans",
                         gray_bg = F, 
                         horizontal = TRUE) +
-  theme(text = element_text(family = custom_font_family, 
-                            size = 25, color = "black"),
+  theme(text = element_text(family = custom_font_family,
+                            color = "black"),
         axis.ticks.length = unit(5, "pt"),
         axis.ticks.x = element_line(size = 0.75),
         axis.title.x = element_text(margin = margin(t = 15)),
@@ -384,7 +382,8 @@ data_hcmst_select <- data_hcmst %>%
   group_by(same_sex_couple, year_couple_met, where_couple_met) %>% 
   summarise(frequency = sum(value)) %>% 
   mutate(percentage = frequency/sum(frequency)*100) %>% 
-  mutate(year_couple_met = ymd(year_couple_met, truncated = 2L))
+  mutate(year_couple_met = ymd(year_couple_met, truncated = 2L)) %>% 
+  filter(if(same_sex_couple == 1) year_couple_met > "1985-01-01" else TRUE) 
 
 head(data_hcmst_select)
 ```
@@ -395,23 +394,22 @@ facet_label <- c( `0` = "Heterosexual couples",
 ```
 
 ```{r}
-ggplot(data_hcmst_select,
+full_plot <- ggplot(data_hcmst_select,
        aes(x = year_couple_met,
            y = percentage)) +
   geom_smooth(aes(group = where_couple_met,
               colour = where_couple_met), 
           method = "loess",
           span = 0.8,
-          se = FALSE,
-          size = 5) +
+          se = FALSE) +
   facet_grid(.~same_sex_couple,
              space = "free",
              scales = "free",
              labeller = as_labeller(facet_label)) +
   scale_x_date(breaks = custom_date_left,
                labels = x.labs,
-               limits = as.Date(c("1940-01-01","2010-01-01")), 
-               expand = c(0.01, 0)
+#               limits = as.Date(c("1940-01-01","2010-01-01")), 
+ #              expand = c(0.01, 0)
                ) +
   scale_y_continuous(expand = c(0, 0), 
                      limits = c(0, 70), 
@@ -424,15 +422,14 @@ ggplot(data_hcmst_select,
                         base_family = "ITC Officina Sans",
                         gray_bg = F, 
                         horizontal = TRUE) +
-  theme(text = element_text(family = custom_font_family, 
-                            size = 25, 
+  theme(text = element_text(family = custom_font_family,
                             color = "black"),
         axis.ticks.length = unit(5, "pt"),
         axis.ticks.x = element_line(size = 0.75),
         axis.title.x = element_text(margin = margin(t = 10,
                                                     r = 100)),
         panel.grid.major.y = element_line(color = "#B2C2CA", 
-                                          size = 1.5),
+                                          size = 1),
         strip.text = element_text(hjust = 0, 
                                   face = "bold"),
         plot.caption = element_text(hjust = 0,
@@ -445,10 +442,59 @@ ggplot(data_hcmst_select,
        x = expression(italic("Year Couple Met")), 
        y=NULL) +
    scale_color_manual(values = unlist(custom_color_pallete, use.names = FALSE))
+
+full_plot
 ```
 
+## Labels
 
 
+```{r}
+full_plot_right_label <- full_plot +
+  geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_college" & data_hcmst_select$year_couple_met == "1940-01-01",],
+            label = "College",
+            nudge_y = 5,
+            hjust ="left") +
+  geom_text_repel(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_school" & data_hcmst_select$year_couple_met == "1946-01-01",],
+            label = "Primary/\nsecondary\nschool",
+            nudge_y = 0.2,
+            hjust = "left",
+            direction = "y") +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_church" & data_hcmst_select$year_couple_met == "1959-01-01",],
+            label = "Church",
+            nudge_y = 1.9,
+            hjust = "left") +
+    geom_text(data = data_hcmst_select[data_hcmst_hetero$where_couple_met == "q24_bar_restaurant" & data_hcmst_select$year_couple_met == "1967-01-01",],
+            label = "Bar/restaurant",
+            nudge_y = -2,
+            hjust = "left") +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "met_through_friends" & data_hcmst_select$year_couple_met == "1981-01-01",],
+            label = "Through friends",
+            nudge_y = -1,
+            hjust = "left") +
+        geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_met_online" & data_hcmst_select$year_couple_met == "1989-01-01" & data_hcmst_select$same_sex_couple == 0,],
+            label = expression(bold("Online")),
+            nudge_y = 2)
 
+full_plot_right_label
+```
 
+```{r}
+full_plot_right_label +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_church" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
+            label = "Church",
+            nudge_y = -10) +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_college" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
+            label = "College",
+            nudge_y = 5) +
+  geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_R_cowork" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
+            label = "Co-workers",
+            nudge_y = 3) +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "met_through_friends" & data_hcmst_select$year_couple_met == "1987-01-01" & data_hcmst_select$same_sex_couple == 1,],
+            label = "Through\nfriends",
+            nudge_y = 27) +
+    geom_text(data = data_hcmst_select[data_hcmst_select$where_couple_met == "q24_met_online" & data_hcmst_select$year_couple_met == "2004-01-01" & data_hcmst_select$same_sex_couple == 1,],
+            label = expression(bold("Online")),
+            nudge_y = 28)
+```
 
